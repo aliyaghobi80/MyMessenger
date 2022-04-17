@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "607913079566",
+    "project_id": "mymessenger-40fc2",
+    "storage_bucket": "mymessenger-40fc2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607913079566:android:937f6e8973236919b09d5f",
+        "android_client_info": {
+          "package_name": "com.example.p_0_fire"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "607913079566-7rnh8ov3gbf1kjp7ungojpqs8k1ojfl6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.p_0_fire",
+            "certificate_hash": "dce1a60f7ac59d81f82b7de9b0737a79c0b5c688"
+          }
+        },
+        {
+          "client_id": "607913079566-jkrgeokppckdt7apo568c24qrb73turh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsER5OxVl2iROQw5os-r9m1Rv25o7u7dA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "607913079566-jkrgeokppckdt7apo568c24qrb73turh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
