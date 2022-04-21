@@ -18,7 +18,7 @@ kNavigate(BuildContext context, String path) {
             return ProfileScreen();
           }
           else{
-            return  HomeScreen();
+            return LoginScreen();
           }
         },
       ),

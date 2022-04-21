@@ -1,20 +1,23 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-int counter=0;
+
+int counter = 0;
 final kMyInputDecoration = InputDecoration(
   border: OutlineInputBorder(
     borderRadius: BorderRadius.circular(20),
   ),
   prefixIcon: Icon(CupertinoIcons.person),
   contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+  hintStyle: TextStyle(color: Colors.black),
+
 );
 
 
-const kTextStyleProfileScreen=TextStyle(fontSize: 15,fontWeight: FontWeight.w400,);
-
-
-
+TextStyle kTextStyleProfileScreen = TextStyle(
+  fontSize: 15,
+  fontWeight: FontWeight.w400,
+).copyWith(color: Colors.black);
 
 const String kMyPhoneNumber = '+1 1111111111';
 const kDarkColor = Color(0xFF0e1621);
@@ -38,7 +41,7 @@ const kTimeTextStyle = TextStyle(
   color: kLightGrayColor,
 );
 const kTextStyleButton =
-TextStyle(fontSize: 25, fontWeight: FontWeight.w500, fontFamily: 'Handlee');
+    TextStyle(fontSize: 25, fontWeight: FontWeight.w500, fontFamily: 'Handlee');
 const kStyleSomebody = BubbleStyle(
   nip: BubbleNip.leftTop,
   color: Colors.white,
@@ -66,13 +69,10 @@ const kStyleMe = BubbleStyle(
 );
 
 String validateMobile(String value) {
-
-
   if (value.isEmpty) {
     return 'Please enter Code!!!';
-  } else if (value.length<6) {
+  } else if (value.length < 6) {
     return 'Please enter Correct Code';
   }
   return 'ok✅';
 }
-

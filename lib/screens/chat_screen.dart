@@ -16,13 +16,16 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  DateTime dateNow = DateTime.now();
+
+  String date = DateTime.now().toString().substring(0, 10);
   FirebaseFirestore fireStore = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
   CollectionReference messageRef =
-  FirebaseFirestore.instance.collection('Messages');
+      FirebaseFirestore.instance.collection('Messages');
   TextEditingController controller = TextEditingController();
   ScrollController scrollController = ScrollController();
-
+  bool isDarkMode = true;
   bool isEditing = false;
   String updatingMessage = '';
   String updatingMessageId = '';
@@ -36,11 +39,30 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //reference to user Collection
+
     size = MediaQuery.of(context).size;
     // bool isDarkMode = false;
     return Scaffold(
+      backgroundColor: (isDarkMode) ? Colors.grey.shade800 : Colors.white,
       appBar: AppBar(
         title: const Text('Chat Screen'),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              setState(() {
+                if (isDarkMode) {
+                  isDarkMode = false;
+                } else {
+                  isDarkMode = true;
+                }
+                print(isDarkMode);
+              });
+            },
+            label: Text((isDarkMode) ? 'dark' : 'Light'),
+            icon: Icon((isDarkMode) ? Icons.dark_mode : Icons.light_mode),
+          )
+        ],
       ),
       body: Column(
         children: [
@@ -99,6 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                     CrossAxisAlignment.baseline,
                                     textBaseline: TextBaseline.alphabetic,
                                     children: [
+                                     // Text(data['name']),
                                       Text(data['text'],
                                           style: (isMe)
                                               ? kMyTextStyle
@@ -177,7 +200,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                   controller: controller,
                   decoration: kMyInputDecoration.copyWith(
-                    label: Text('Type...',style: TextStyle(fontSize: 15),),
+                    label: Text(
+                      'Type...',
+                      style: TextStyle(fontSize: 15),
+                    ),
                     hintText: 'پیغامی را بنویسید',
                   ),
                 ),
@@ -200,6 +226,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+
   }
 
   void sendMessage() async {
@@ -279,3 +306,70 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 }
+//StreamBuilder<QuerySnapshot>(
+//                   stream: messageRef
+//                       .orderBy('date', descending: true)
+//                       .orderBy('time', descending: true)
+//                       .snapshots(),
+//                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//                     if (snapshot.hasData) {
+//                       return ListView(
+//                         reverse: true,
+//                         controller: scrollController,
+//                         physics: AlwaysScrollableScrollPhysics(),
+//                         children: snapshot.data!.docs.map((doc) {
+//                           Map data = doc.data() as Map;
+//                           String id = doc.id;
+//                           bool isMe = data['sender'] == auth.currentUser!.uid;
+//
+//                           return GestureDetector(
+//                             onTap: () {
+//                               onMessageTaped(data, id);
+//                             },
+//                             child: Column(
+//                               children: [
+//                                 Bubble(
+//                                   margin: BubbleEdges.only(
+//                                       top: 10,
+//                                       left: isMe ? 50 : 0,
+//                                       right: !isMe ? 50 : 0),
+//                                   padding: BubbleEdges.symmetric(vertical: 1,horizontal: 10),
+//                                   nip: (isMe)
+//                                       ? BubbleNip.rightTop
+//                                       : BubbleNip.leftTop,
+//                                   color: (isMe) ? kGreenColor : kLightDarkColor,
+//                                   alignment: (isMe)
+//                                       ? Alignment.topRight
+//                                       : Alignment.topLeft,
+//                                   elevation: 3,
+//                                   shadowColor: Colors.green,
+//                                   borderUp: true,
+//                                   borderColor: Colors.blue,
+//                                   borderWidth: 0.4,
+//                                   radius: Radius.circular(15),
+//                                   child: Column(
+//                                     crossAxisAlignment:
+//                                         CrossAxisAlignment.baseline,
+//                                     textBaseline: TextBaseline.alphabetic,
+//                                     children: [
+//                                       Text(data['sender_phone']),
+//                                       Text(data['text'],
+//                                           style: (isMe)
+//                                               ? kMyTextStyle
+//                                               : kOtherTextStyle),
+//                                       Text(
+//                                         data['time'].toString().substring(0, 5),
+//                                         style: kTimeTextStyle,
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           );
+//                         }).toList(),
+//                       );
+//                     } else {
+//                       return Center(child: CircularProgressIndicator());
+//                     }
+//                   }),

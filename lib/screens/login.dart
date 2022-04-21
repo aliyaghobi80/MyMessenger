@@ -111,6 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       keyboardType: TextInputType.phone,
                       decoration: kMyInputDecoration.copyWith(
                         hintText: 'Code',
+                        focusColor: Colors.yellow
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -151,6 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
     String phone = phoneNum;
     print(phone);
     String code = valCodeController.text;
+
+
     // send code to phone
     if (isWaitingForCode == false) {
       await FirebaseAuth.instance.verifyPhoneNumber(
@@ -199,7 +202,9 @@ class _LoginScreenState extends State<LoginScreen> {
         print(userCredential.user);
         print(auth.currentUser);
         if (auth.currentUser != null) {
-          kNavigate(context, 'profile');
+         kNavigate(context, 'profile');
+        }else{
+          kNavigate(context, 'login');
         }
       } //
       else {

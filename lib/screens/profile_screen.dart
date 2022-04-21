@@ -151,7 +151,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 decoration: kMyInputDecoration.copyWith(
                                   label: Text(
                                     'Full Name',
-                                    style: TextStyle(fontSize: 15),
+                                    style: TextStyle(fontSize: 15,color: Colors.black),
+
                                   ),
                                   hintText: 'نام خود را وارد کنید',
                                 ),
@@ -169,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-
+                      //complate later
                     ],
                   ))
                 ],
@@ -182,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   onSubmitPressed() async {
     String uid = auth.currentUser!.uid;
     String name = nameController.text;
-
+    String phoneNumber=auth.currentUser!.phoneNumber.toString();
     setState(() {
       showProgress = true;
     });
@@ -193,13 +194,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Map<String, dynamic> itemMap = Map();
     itemMap['name'] = name;
     itemMap['uploader'] = uid;
+    itemMap['phone']=phoneNumber;
     if (imagePath != '-1') {
       itemMap['image'] = imagePath;
     } else {
       itemMap['image'] = null;
     }
+    Map<String,dynamic> nameMap=Map();
+    nameMap['name']=name;
+
     try {
-      DocumentReference doc = await fireStore.collection('items').add(itemMap);
+      DocumentReference doc = await fireStore.collection('user').add(itemMap);
+      await fireStore.collection('Messages').add(nameMap);
       print('success uploading');
       print('added document :id= ' + doc.id);
       showProgress = false;
