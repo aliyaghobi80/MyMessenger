@@ -3,37 +3,74 @@ import 'dart:async';
 import 'package:bubble/bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:p_0_fire/constant.dart';
+import 'package:p_0_fire/constant_functions.dart';
 import 'package:p_0_fire/widgets/chat_message_dialog.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  String type;
+  String friendUid;
+  String friendName;
+  String image;
+
+  ChatScreen({
+    required this.type,
+    required this.friendName,
+    required this.friendUid,
+    required this.image,
+
+  });
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _ChatScreenState createState() => _ChatScreenState(friendName, friendUid);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
   DateTime dateNow = DateTime.now();
 
   String date = DateTime.now().toString().substring(0, 10);
+  CollectionReference chatsRef = FirebaseFirestore.instance.collection('chats');
+  CollectionReference groupRef = FirebaseFirestore.instance.collection('groupChats');
+  final friendUid;
+  final friendName;
+  var currentUserId = FirebaseAuth.instance.currentUser!.uid;
+  var chatDocId;
+
+  _ChatScreenState(this.friendName, this.friendUid);
+
+  @override
+  void initState() {
+    super.initState();
+    chatsRef
+        .where('users', isEqualTo: {friendUid: null, currentUserId: null})
+        .limit(1)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+          if (querySnapshot.docs.isNotEmpty) {
+            chatDocId = querySnapshot.docs.single.id;
+          } else {
+            chatsRef.add({
+              'users': {currentUserId: null, friendUid: null}
+            }).then((value) => {chatDocId = value});
+          }
+        })
+        .catchError((error) {
+          print(error);
+        });
+    setState(() {});
+  }
+
   FirebaseFirestore fireStore = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
-  CollectionReference messageRef =
-      FirebaseFirestore.instance.collection('Messages');
   TextEditingController controller = TextEditingController();
   ScrollController scrollController = ScrollController();
   bool isDarkMode = true;
   bool isEditing = false;
   String updatingMessage = '';
   String updatingMessageId = '';
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   late Size size;
 
@@ -46,7 +83,8 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: (isDarkMode) ? Colors.grey.shade800 : Colors.white,
       appBar: AppBar(
-        title: const Text('Chat Screen'),
+        title:
+            Text(widget.type == 'usersList' ? widget.friendName : 'Group'),
         actions: [
           TextButton.icon(
             onPressed: () {
@@ -56,94 +94,154 @@ class _ChatScreenState extends State<ChatScreen> {
                 } else {
                   isDarkMode = true;
                 }
-                print(isDarkMode);
               });
             },
-            label: Text((isDarkMode) ? 'dark' : 'Light'),
-            icon: Icon((isDarkMode) ? Icons.dark_mode : Icons.light_mode),
-          )
+            label: Text(
+              (isDarkMode) ? 'dark' : 'Light',
+              style: TextStyle(color: Colors.black),
+            ),
+            icon: Icon(
+              (isDarkMode) ? Icons.dark_mode : Icons.light_mode,
+              color: Colors.black,
+            ),
+          ),
+          TextButton(
+              onPressed: () {
+                if(widget.type == 'group'){
+                  kNavigate(context, 'home');
+                }
+                else{
+                Navigator.pop(context);
+                }
+              },
+              child: Icon(
+                Icons.keyboard_arrow_right,
+                color: Colors.white,
+              )),
         ],
+        leading: CircleAvatar(
+          backgroundColor: Colors.transparent,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: FadeInImage.assetNetwork(
+                fit: BoxFit.cover,
+                height: 100,
+                width: 100,
+                placeholder: 'assets/images/loading2.gif',
+                image: widget.image
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
-              child: StreamBuilder<QuerySnapshot>(
-                  stream: messageRef
-                      .orderBy('date', descending: true)
-                      .orderBy('time', descending: true)
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasData) {
-                      return ListView(
-                        reverse: true,
-                        controller: scrollController,
-                        physics: AlwaysScrollableScrollPhysics(),
-                        children: snapshot.data!.docs.map((doc) {
-                          Map data = doc.data() as Map;
-                          String id = doc.id;
-                          bool isMe = data['sender'] == auth.currentUser!.uid;
-                          return GestureDetector(
-                            onTap: () {
-                              onMessageTaped(data, id);
-                            },
-                            child: Column(
-                              children: [
-                                Bubble(
-                                  alignment: Alignment.center,
-                                  color: Color.fromRGBO(179, 255, 178, 1.0),
-                                  child: Text('TODAY',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 11.0)),
-                                ),
-                                Bubble(
-                                  margin: BubbleEdges.only(
-                                      top: 10,
-                                      left: isMe ? 50 : 0,
-                                      right: !isMe ? 50 : 0),
-                                  padding: BubbleEdges.all(10),
-                                  nip: (isMe)
-                                      ? BubbleNip.rightTop
-                                      : BubbleNip.leftTop,
-                                  color: (isMe) ? kGreenColor : kLightDarkColor,
-                                  alignment: (isMe)
-                                      ? Alignment.topRight
-                                      : Alignment.topLeft,
-                                  elevation: 3,
-                                  shadowColor: Colors.green,
-                                  borderUp: true,
-                                  borderColor: Colors.blue,
-                                  borderWidth: 0.4,
-                                  radius: Radius.circular(15),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                     // Text(data['name']),
-                                      Text(data['text'],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: chatsRef
+                        .doc(chatDocId)
+                        .collection('messages')
+                        .orderBy('createdOn', descending: true)
+                        .snapshots(),
+                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text('error'),
+                        );
+                      }
+                      if (snapshot.hasData) {
+                        //this timer for reload chatScreen
+                        Timer(
+                          Duration(microseconds: 1),
+                              () {
+                            setState(() {});
+                          },
+                        );
+                        return ListView(
+                          reverse: true,
+                          controller: scrollController,
+                          physics: AlwaysScrollableScrollPhysics(),
+                          children: snapshot.data!.docs.map((doc) {
+                            Map data = doc.data() as Map;
+                            String id = doc.id;
+                            bool isMe = data['uid'] == auth.currentUser!.uid;
+                            return GestureDetector(
+                              onTap: () {
+                                onMessageTaped(data, id, isMe);
+                              },
+                              child: Column(
+                                children: [
+                                  Bubble(
+                                    margin: BubbleEdges.only(
+                                        top: 5,
+                                        left: isMe ? 50 : 0,
+                                        right: !isMe ? 50 : 0),
+                                    padding: BubbleEdges.all(5),
+                                    nip: (isMe)
+                                        ? BubbleNip.rightBottom
+                                        : BubbleNip.leftBottom,
+                                    // nipHeight: 10,
+                                    nipWidth: 5,
+                                    color: (isMe) ? kGreenColor : kLightDarkColor,
+                                    alignment: (isMe)
+                                        ? Alignment.topRight
+                                        : Alignment.topLeft,
+                                    elevation: 3,
+                                    shadowColor: Colors.green,
+                                    borderUp: true,
+                                    borderColor: Colors.blue,
+                                    borderWidth: 0.4,
+                                    radius: Radius.circular(10),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                      textBaseline: TextBaseline.alphabetic,
+                                      children: [
+                                        Text(
+                                          (isMe) ? 'me' : friendName,
+                                          style: kMyTextStyle.copyWith(
+                                              fontSize: 12,
+                                              color: Colors.yellow,
+                                              debugLabel: 'hi'),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5.0),
+                                          child: Text(data['msg'],
+                                              style: (isMe)
+                                                  ? kMyTextStyle
+                                                  : kOtherTextStyle),
+                                        ),
+                                        Text(
+                                          data['createdOn'] == null
+                                              ? DateTime.now()
+                                              .toString()
+                                              .substring(11, 16)
+                                              : data['createdOn']
+                                              .toDate()
+                                              .toString()
+                                              .substring(11, 16),
                                           style: (isMe)
-                                              ? kMyTextStyle
-                                              : kOtherTextStyle),
-                                      Text(
-                                        data['time'].toString().substring(0, 5),
-                                        style: kTimeTextStyle,
-                                      ),
-                                    ],
+                                              ? kTimeTextStyle.copyWith(
+                                              color: Colors.grey.shade800)
+                                              : kTimeTextStyle,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  }),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    }),
+              ),
             ),
-          ),
           Container(
             padding: EdgeInsets.only(top: 5.0, left: 1),
             child: Column(
@@ -166,6 +264,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: Expanded(
                         child: Text(
                           updatingMessage,
+                          style: kOtherTextStyle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -216,7 +315,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   Icons.send,
                   color: Colors.blue,
                 ),
-                onPressed: sendMessage,
+                onPressed: () {
+                  setState(() {
+                    sendMessag(controller.text);
+                  });
+                },
               ),
             ],
           ),
@@ -226,7 +329,6 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
-
   }
 
   void sendMessage() async {
@@ -239,7 +341,6 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       return;
     }
-
     Map<String, dynamic> newMap = Map();
     newMap['text'] = text;
     String dateTime = DateTime.now().toString();
@@ -249,7 +350,7 @@ class _ChatScreenState extends State<ChatScreen> {
     newMap['date'] = date;
     //edit
     if (isEditing == true) {
-      DocumentReference doc = messageRef.doc(updatingMessageId);
+      DocumentReference doc = groupRef.doc(updatingMessageId);
       doc.update({
         "text": text,
       });
@@ -257,14 +358,42 @@ class _ChatScreenState extends State<ChatScreen> {
     else {
       newMap['sender'] = auth.currentUser!.uid;
       newMap['sender_phone'] = auth.currentUser!.phoneNumber;
-      messageRef.add(newMap).then((value) {
+      chatsRef.add(newMap).then((value) {
         print(value);
       });
     }
     resetValues();
   }
 
-  onMessageTaped(Map data, String id) {
+  void sendMessag(String msg) {
+    if (msg.length <= 2) {
+      controller.text = 'Please type more👈🏻👈🏻👈🏻';
+      Timer(Duration(seconds: 2), () {
+        controller.text = '';
+      });
+      return;
+    }
+    //edit
+    if (isEditing == true) {
+      DocumentReference doc =
+          chatsRef.doc(chatDocId).collection('messages').doc(updatingMessageId);
+      doc.update({
+        "msg": msg,
+      }).then((value) => null);
+    }
+
+    //add data
+    chatsRef.doc(chatDocId).collection('messages').add({
+      'createdOn': FieldValue.serverTimestamp(),
+      'uid': currentUserId,
+      'msg': msg
+    }).then((value) {
+      controller.text = '';
+    });
+    resetValues();
+  }
+
+  onMessageTaped(Map data, String id, bool isMe) {
     showDialog(
       context: context,
       barrierLabel: 'Hello',
@@ -274,7 +403,11 @@ class _ChatScreenState extends State<ChatScreen> {
             onDelete(data, id);
           },
           onEdite: () {
-            onEdit(data, id);
+            if (isMe) {
+              onEdit(data, id);
+            } else {
+              return;
+            }
           },
         );
       },
@@ -282,7 +415,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   onDelete(Map data, String id) async {
-    messageRef.doc(id).delete();
+    chatsRef.doc(chatDocId).collection('messages').doc(id).delete();
     Navigator.pop(context);
     print(id);
   }
@@ -290,8 +423,8 @@ class _ChatScreenState extends State<ChatScreen> {
   onEdit(Map data, String id) async {
     setState(() {
       isEditing = true;
-      updatingMessage = data['text'];
-      controller.text = data['text'];
+      updatingMessage = data['msg'];
+      controller.text = data['msg'];
       updatingMessageId = id;
     });
     Navigator.pop(context);
@@ -306,70 +439,3 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 }
-//StreamBuilder<QuerySnapshot>(
-//                   stream: messageRef
-//                       .orderBy('date', descending: true)
-//                       .orderBy('time', descending: true)
-//                       .snapshots(),
-//                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-//                     if (snapshot.hasData) {
-//                       return ListView(
-//                         reverse: true,
-//                         controller: scrollController,
-//                         physics: AlwaysScrollableScrollPhysics(),
-//                         children: snapshot.data!.docs.map((doc) {
-//                           Map data = doc.data() as Map;
-//                           String id = doc.id;
-//                           bool isMe = data['sender'] == auth.currentUser!.uid;
-//
-//                           return GestureDetector(
-//                             onTap: () {
-//                               onMessageTaped(data, id);
-//                             },
-//                             child: Column(
-//                               children: [
-//                                 Bubble(
-//                                   margin: BubbleEdges.only(
-//                                       top: 10,
-//                                       left: isMe ? 50 : 0,
-//                                       right: !isMe ? 50 : 0),
-//                                   padding: BubbleEdges.symmetric(vertical: 1,horizontal: 10),
-//                                   nip: (isMe)
-//                                       ? BubbleNip.rightTop
-//                                       : BubbleNip.leftTop,
-//                                   color: (isMe) ? kGreenColor : kLightDarkColor,
-//                                   alignment: (isMe)
-//                                       ? Alignment.topRight
-//                                       : Alignment.topLeft,
-//                                   elevation: 3,
-//                                   shadowColor: Colors.green,
-//                                   borderUp: true,
-//                                   borderColor: Colors.blue,
-//                                   borderWidth: 0.4,
-//                                   radius: Radius.circular(15),
-//                                   child: Column(
-//                                     crossAxisAlignment:
-//                                         CrossAxisAlignment.baseline,
-//                                     textBaseline: TextBaseline.alphabetic,
-//                                     children: [
-//                                       Text(data['sender_phone']),
-//                                       Text(data['text'],
-//                                           style: (isMe)
-//                                               ? kMyTextStyle
-//                                               : kOtherTextStyle),
-//                                       Text(
-//                                         data['time'].toString().substring(0, 5),
-//                                         style: kTimeTextStyle,
-//                                       ),
-//                                     ],
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                           );
-//                         }).toList(),
-//                       );
-//                     } else {
-//                       return Center(child: CircularProgressIndicator());
-//                     }
-//                   }),

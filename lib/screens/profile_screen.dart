@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -192,20 +193,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       imagePath = await uploadItemImage();
     }
     Map<String, dynamic> itemMap = Map();
+    if(name.length<4){
+        nameController.text = 'Please type more👈🏻👈🏻👈🏻';
+        Timer(Duration(seconds: 2), () {
+          nameController.text = '';
+        });
+        return;
+    }
     itemMap['name'] = name;
-    itemMap['uploader'] = uid;
+    itemMap['userId'] = uid;
     itemMap['phone']=phoneNumber;
     if (imagePath != '-1') {
       itemMap['image'] = imagePath;
     } else {
       itemMap['image'] = null;
     }
-    Map<String,dynamic> nameMap=Map();
-    nameMap['name']=name;
 
     try {
-      DocumentReference doc = await fireStore.collection('user').add(itemMap);
-      await fireStore.collection('Messages').add(nameMap);
+      DocumentReference doc = await fireStore.collection('users').add(itemMap);
       print('success uploading');
       print('added document :id= ' + doc.id);
       showProgress = false;

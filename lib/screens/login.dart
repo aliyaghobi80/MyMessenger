@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Future.delayed(
         const Duration(milliseconds: 500),
             () {
-          kNavigate(context, 'profile');
+          kNavigate(context, 'home');
         },
       );
     }
@@ -153,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
     print(phone);
     String code = valCodeController.text;
 
-
     // send code to phone
     if (isWaitingForCode == false) {
       await FirebaseAuth.instance.verifyPhoneNumber(
@@ -201,15 +200,12 @@ class _LoginScreenState extends State<LoginScreen> {
         await auth.signInWithCredential(credential);
         print(userCredential.user);
         print(auth.currentUser);
-        if (auth.currentUser != null) {
-         kNavigate(context, 'profile');
-        }else{
-          kNavigate(context, 'login');
-        }
+          kNavigate(context, 'profile');
       } //
       else {
         print('sth is wrong');
       }
     }
+
   }
 }

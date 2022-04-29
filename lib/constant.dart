@@ -24,14 +24,14 @@ const kDarkColor = Color(0xFF0e1621);
 const kLightDarkColor = Color(0xFF182533);
 const kGrayColor = Color(0xFF3a4d61);
 const kLightGrayColor = Color(0xFF6d7f8f);
-const kGreenColor = Color(0xFF005c4b);
+const kGreenColor = Color(0xFF08C187);
 const kMyTextStyle = TextStyle(
-    fontSize: 21,
+    fontSize: 15,
     fontWeight: FontWeight.w500,
     color: Colors.white,
     fontFamily: 'Handlee');
 const kOtherTextStyle = TextStyle(
-    fontSize: 21,
+    fontSize: 16,
     fontWeight: FontWeight.w500,
     color: Colors.white,
     fontFamily: 'b-nazanin');
@@ -40,6 +40,9 @@ const kTimeTextStyle = TextStyle(
   fontWeight: FontWeight.w500,
   color: kLightGrayColor,
 );
+const kNamePersonTextStyle=TextStyle( fontSize: 20,
+  fontWeight: FontWeight.w300,
+  color: Colors.white,);
 const kTextStyleButton =
     TextStyle(fontSize: 25, fontWeight: FontWeight.w500, fontFamily: 'Handlee');
 const kStyleSomebody = BubbleStyle(

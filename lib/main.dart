@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.white,
           iconTheme: IconThemeData(color: Colors.black),),
 
-      home: LoginScreen(),
+      home:LoginScreen(),
     );
   }
 }

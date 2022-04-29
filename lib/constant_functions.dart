@@ -12,7 +12,7 @@ kNavigate(BuildContext context, String path) {
       MaterialPageRoute(
         builder: (context) {
           if(path=='chat') {
-            return ChatScreen();
+            return ChatScreen(type: '', friendName: '', friendUid: '',image: '',);
           }
           else if(path=='profile'){
             return ProfileScreen();
