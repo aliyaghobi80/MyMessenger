@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -21,17 +23,18 @@ class _LoginScreenState extends State<LoginScreen> {
   late String phoneNum;
   bool isButtonShow = false;
   FirebaseAuth auth = FirebaseAuth.instance;
-  final GlobalKey<FormState> _formKey = GlobalKey();
 
+  
+
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
   @override
   void initState() {
-
     super.initState();
     if (auth.currentUser != null) {
       Future.delayed(
         const Duration(milliseconds: 500),
-            () {
+        () {
           kNavigate(context, 'home');
         },
       );
@@ -58,6 +61,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 20,
                 ),
                 SizedBox(
+                  height: 100,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black12,
+                    radius: 50,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white10,
+                      radius: 48,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: Icon(Icons.person , size: 70,)
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10,),
+                SizedBox(
                     height: 100,
                     child: IntlPhoneField(
                       controller: phoneController,
@@ -78,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       dropdownDecoration: BoxDecoration(
                           border: Border(
                               right:
-                              BorderSide(color: Colors.white, width: 1))),
+                                  BorderSide(color: Colors.white, width: 1))),
                       onChanged: (phone) {
                         phoneNum = phone.completeNumber;
                         if (phoneNum.substring(3, 4) == '0') {
@@ -99,6 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 20,
                 ),
+                //code TextField
                 Visibility(
                   visible: isWaitingForCode,
                   child: SizedBox(
@@ -110,9 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: valCodeController,
                       keyboardType: TextInputType.phone,
                       decoration: kMyInputDecoration.copyWith(
-                        hintText: 'Code',
-                        focusColor: Colors.yellow
-                      ),
+                          hintText: 'Code', focusColor: Colors.yellow),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -120,6 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 40,
                 ),
+                // Button
                 Visibility(
                   visible: isButtonShow,
                   child: ElevatedButton(
@@ -132,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.black,
                         ),
                         padding:
-                        EdgeInsets.symmetric(horizontal: 50,vertical: 10)),
+                            EdgeInsets.symmetric(horizontal: 50, vertical: 10)),
                     onPressed: onButtonPressed,
                     child: Text(
                       !isWaitingForCode ? 'Send Code' : 'Submit',
@@ -153,6 +172,13 @@ class _LoginScreenState extends State<LoginScreen> {
     print(phone);
     String code = valCodeController.text;
 
+     FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      if (user == null) {
+        kNavigate(context, 'profile');
+      } else {
+       kNavigate(context, 'home');
+      }
+    });
     // send code to phone
     if (isWaitingForCode == false) {
       await FirebaseAuth.instance.verifyPhoneNumber(
@@ -198,14 +224,14 @@ class _LoginScreenState extends State<LoginScreen> {
         // Sign the user in (or link) with the credential
         UserCredential userCredential =
         await auth.signInWithCredential(credential);
+
         print(userCredential.user);
         print(auth.currentUser);
-          kNavigate(context, 'profile');
+        kNavigate(context, 'profile');
       } //
       else {
         print('sth is wrong');
       }
     }
-
   }
 }

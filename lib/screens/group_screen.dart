@@ -131,14 +131,11 @@ class _GroupScreenState extends State<GroupScreen> {
                                                 : kOtherTextStyle),
                                       ),
                                       Text(
-                                        data['createdOn'] == null
+                                        data['time'] == null
                                             ? DateTime.now()
-                                            .toString()
-                                            .substring(11, 16)
-                                            : data['createdOn']
-                                            .toDate()
-                                            .toString()
-                                            .substring(11, 16),
+                                            .toString().substring(11,16)
+                                            : data['time']
+                                            .toString().substring(0,5),
                                         style: (isMe)
                                             ? kTimeTextStyle.copyWith(
                                             color: Colors.grey.shade800)

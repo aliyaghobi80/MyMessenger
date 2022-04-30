@@ -119,7 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: Colors.white,
               )),
         ],
-        leading:CustomCircleAvatar(placeholder: 'assets/images/loading2.gif', imageUrl: widget.image,),
+        leading:CustomCircleAvatar(placeholder: 'assets/images/loading2.gif', imageUrl: widget.image,borderRadius: 50,radius: 25,),
       ),
       body: Column(
         children: [
@@ -334,7 +334,7 @@ class _ChatScreenState extends State<ChatScreen> {
           chatsRef.doc(chatDocId).collection('messages').doc(updatingMessageId);
       doc.update({
         "msg": msg,
-      }).then((value) => null);
+      });
     }
 
     //add data

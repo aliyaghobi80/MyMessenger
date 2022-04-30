@@ -6,14 +6,17 @@ class CustomCircleAvatar extends StatelessWidget {
 
   String placeholder;
   String imageUrl;
-  CustomCircleAvatar({required this.placeholder,required this.imageUrl});
+  double borderRadius;
+  double radius;
+  CustomCircleAvatar({required this.placeholder,required this.imageUrl,required this.borderRadius,required this.radius});
 
   @override
   Widget build(BuildContext context) {
     return  CircleAvatar(
       backgroundColor: Colors.transparent,
+      radius: radius,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
+        borderRadius: BorderRadius.circular(borderRadius),
         child: FadeInImage.assetNetwork(
             fit: BoxFit.cover,
             height: 100,
