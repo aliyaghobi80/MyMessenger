@@ -47,7 +47,7 @@ class _GroupScreenState extends State<GroupScreen> {
     size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat Screen'),
+        title: const Text('Group Chat'),
         actions: [
           TextButton(
               onPressed: () {
