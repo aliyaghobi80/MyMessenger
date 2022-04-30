@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:p_0_fire/constant.dart';
 import 'package:p_0_fire/constant_functions.dart';
 import 'package:p_0_fire/widgets/chat_message_dialog.dart';
+import 'package:p_0_fire/widgets/custom_circle_avatar.dart';
 
 class ChatScreen extends StatefulWidget {
   String type;
@@ -76,7 +77,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //reference to user Collection
 
     size = MediaQuery.of(context).size;
     // bool isDarkMode = false;
@@ -119,19 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: Colors.white,
               )),
         ],
-        leading: CircleAvatar(
-          backgroundColor: Colors.transparent,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: FadeInImage.assetNetwork(
-                fit: BoxFit.cover,
-                height: 100,
-                width: 100,
-                placeholder: 'assets/images/loading2.gif',
-                image: widget.image
-            ),
-          ),
-        ),
+        leading:CustomCircleAvatar(placeholder: 'assets/images/loading2.gif', imageUrl: widget.image,),
       ),
       body: Column(
         children: [
@@ -317,7 +305,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 onPressed: () {
                   setState(() {
-                    sendMessag(controller.text);
+                    sendMessage(controller.text);
                   });
                 },
               ),
@@ -331,41 +319,8 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void sendMessage() async {
-    String text = controller.text;
-    print(text);
-    if (text.length <= 2) {
-      controller.text = 'Please type more👈🏻👈🏻👈🏻';
-      Timer(Duration(seconds: 2), () {
-        controller.text = '';
-      });
-      return;
-    }
-    Map<String, dynamic> newMap = Map();
-    newMap['text'] = text;
-    String dateTime = DateTime.now().toString();
-    String date = dateTime.substring(0, 10);
-    String time = dateTime.substring(11, 19);
-    newMap['time'] = time;
-    newMap['date'] = date;
-    //edit
-    if (isEditing == true) {
-      DocumentReference doc = groupRef.doc(updatingMessageId);
-      doc.update({
-        "text": text,
-      });
-    } //add
-    else {
-      newMap['sender'] = auth.currentUser!.uid;
-      newMap['sender_phone'] = auth.currentUser!.phoneNumber;
-      chatsRef.add(newMap).then((value) {
-        print(value);
-      });
-    }
-    resetValues();
-  }
 
-  void sendMessag(String msg) {
+  void sendMessage(String msg) {
     if (msg.length <= 2) {
       controller.text = 'Please type more👈🏻👈🏻👈🏻';
       Timer(Duration(seconds: 2), () {
